@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Strings -->
+    <string name="app_name">ARV-3000</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="welcome">Welcome to ARV-3000</string>
+    <string name="teamname">Brought to you by the Ultraviolet Team.</string>
+    <string name="startMsg">To begin, please click the Start button below.</string>
+    <string name="startBtn">Start</string>
+    <string name="API_KEY">AIzaSyB6uOTqY4vVLVPjipNOhHSFIkEr1cJ5YZI</string>
+    
+    <!-- Colors -->
+    <color name="black">#000000</color>
+	<color name="white">#FFFFFF</color>
+	<color name="light_gray">#F7F7F7</color>
+
+</resources>
