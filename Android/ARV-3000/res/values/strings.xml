@@ -9,7 +9,8 @@
     <string name="teamname">Brought to you by the Ultraviolet Team.</string>
     <string name="startMsg">To begin, please click the Start button below.</string>
     <string name="startBtn">Start</string>
-    <string name="API_KEY">AIzaSyB6uOTqY4vVLVPjipNOhHSFIkEr1cJ5YZI</string>
+    <string name="loadingQuests">Loading quest data...</string>
+    <string name="next">Next</string>
     
     <!-- Colors -->
     <color name="black">#000000</color>

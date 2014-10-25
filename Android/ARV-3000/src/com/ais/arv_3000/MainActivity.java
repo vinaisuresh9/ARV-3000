@@ -20,6 +20,7 @@ public class MainActivity extends Activity{
 			public void onClick(View v) {
 				Intent startIntent = new Intent(MainActivity.this, MapTextActivity.class);
 				startActivity(startIntent);
+				finish();
 			}
 		});
 	}

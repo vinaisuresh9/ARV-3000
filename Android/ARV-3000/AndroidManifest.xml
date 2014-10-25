@@ -13,8 +13,8 @@
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 	
     <uses-sdk
-        android:minSdkVersion="11"
-        android:targetSdkVersion="16" />
+        android:minSdkVersion="13"
+        android:targetSdkVersion="21" />
 
     <application
         android:allowBackup="true"
@@ -30,8 +30,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity 
-            android:name=".MapTextActivity"></activity>
+        <activity android:name=".MapTextActivity"></activity>
+        <activity android:name=".QuestsActivity"></activity>
         <meta-data
     		android:name="com.google.android.gms.version"
     		android:value="@integer/google_play_services_version" />
