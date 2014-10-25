@@ -1,5 +1,5 @@
 #!flask/bin/python
-from flask import Flask, jsonify, make_response, abort
+from flask import Flask, jsonify, make_response, abort, request
 
 app = Flask(__name__)
 
@@ -34,6 +34,11 @@ def get_task(task_id):
     if len(task) == 0:
         abort(404)
     return jsonify({'task': task[0]})
+
+@app.route('/api/generatestory', methods=['GET'])
+def generate_story():
+    
+@app.route('api/')
 
 @app.errorhandler(404)
 def not_found(error):
