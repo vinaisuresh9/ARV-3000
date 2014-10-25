@@ -88,10 +88,11 @@ public class MapTextActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				quest = Boolean.parseBoolean("true");//Query again
+				quest = Boolean.parseBoolean("false");//Query again
 				if(quest) {
 					Intent questList = new Intent(MapTextActivity.this, QuestsActivity.class);
 					startActivity(questList);
+					finish();
 				}
 				else {
 					//query next part of story
