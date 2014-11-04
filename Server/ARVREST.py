@@ -1,35 +1,18 @@
 #!flask/bin/python
 
 from flask import Flask, jsonify, make_response, abort, request
+from json import JSONEncoder
 from story.entity.quest import *
 from story.entity.dialog import *
 from story.entity.item import *
 from story.entity.location import *
 from story.entity.person import *
 from story.quests import *
+from ARVJSONEncoder import *
 
 app = Flask(__name__)
+app.json_encoder = ARVJSONEncoder
 
-tasks = [
-         {
-         'id': 1,
-         'title': 'Buy groceries',
-         'description': 'Milk, Cheese, Pizza, Fruit, Tylenol',
-         'done': False
-         },
-         {
-         'id': 2,
-         'title': 'Learn Python',
-         'description': 'Need to find a good Python tutorial on the web',
-         'done': False
-         },
-         {
-         'id': 3,
-         'title': 'Fake Python',
-         'description': 'Need to find a good BLAHHHH tutorial on the web',
-         'done': False
-         }
-         ]
 
 @app.route('/api/tasks/<int:task_id>', methods=['GET'])
 def get_task(task_id):
@@ -40,10 +23,9 @@ def get_task(task_id):
 
 @app.route('/api/generate_story/<int:client_id>', methods=['GET'])
 def generate_story(client_id):
-    
-    #generate story here and return the story_id, placeholder code for now
+    #generate story here and return the story_id
     story_id = 1
-    return jsonify({'story_id': story_id})
+    return jsonify(story_id=story_id)
     
 @app.route('/api/get_locations/<int:story_id>', methods=['GET'])
 def get_locations(story_id):
