@@ -1,3 +1,6 @@
+import location
+import json
+
 class Quest:
     # trigger currently points to previous quest
     # might need something more sophisticated later
@@ -8,3 +11,6 @@ class Quest:
         self.location = location
         self.dialog = dialog
         self.result = result
+        
+    def to_JSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__)

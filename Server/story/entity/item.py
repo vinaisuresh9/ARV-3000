@@ -4,3 +4,6 @@ class Item:
         self.name = name
         self.desc = desc
         self.location = location
+
+    def to_JSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__)

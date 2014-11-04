@@ -1,5 +1,12 @@
 #!flask/bin/python
+
 from flask import Flask, jsonify, make_response, abort, request
+from story.entity.quest import *
+from story.entity.dialog import *
+from story.entity.item import *
+from story.entity.location import *
+from story.entity.person import *
+from story.quests import *
 
 app = Flask(__name__)
 
@@ -24,10 +31,6 @@ tasks = [
          }
          ]
 
-@app.route('/api/tasks', methods=['GET'])
-def get_tasks():
-    return jsonify({'tasks': tasks})
-
 @app.route('/api/tasks/<int:task_id>', methods=['GET'])
 def get_task(task_id):
     task = filter(lambda t: t['id'] == task_id, tasks)
@@ -35,10 +38,25 @@ def get_task(task_id):
         abort(404)
     return jsonify({'task': task[0]})
 
-@app.route('/api/generatestory', methods=['GET'])
-def generate_story():
+@app.route('/api/generate_story/<int:client_id>', methods=['GET'])
+def generate_story(client_id):
     
-@app.route('api/')
+    #generate story here and return the story_id, placeholder code for now
+    story_id = 1
+    return jsonify({'story_id': story_id})
+    
+@app.route('/api/get_locations/<int:story_id>', methods=['GET'])
+def get_locations(story_id):
+    return;
+
+@app.route('/api/get_people/<int:story_id>', methods=['GET'])
+def get_people(story_id):
+    return;
+
+@app.route('/api/get_people/<int:story_id>/<int:quest_id>', methods=['GET'])
+def get_available_quests(story_id,quest_id):
+    return;
+
 
 @app.errorhandler(404)
 def not_found(error):
