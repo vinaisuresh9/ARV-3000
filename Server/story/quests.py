@@ -8,7 +8,7 @@ QTYPE_OTHER = "QTYPE_OTHER"
 
 # Generate story given client id
 # Returns story id
-def generate_story(client_id):
+def create_story(client_id):
     return 0
 
 # Returns list of locations for given story id
@@ -29,13 +29,13 @@ def get_people(story_id):
 # Generate and return next batch of quests
 def get_quests(story_id, last_quest_id):
     quests = []
-    if (last_quest_id == -1):
-        quests.append(Quest(0, "You wake up in Van Leer, and you don’t recall the previous day. But you think something big happened.", -1, QTYPE_OTHER, None, None, None))
-        quests.append(Quest(1, "You reach into your pocket and see a receipt for Taco Bell. What would you like to do?", 0, QTYPE_OTHER, None, None, None))
-        quests.append(Quest(2, "Go to Taco Bell", 1, QTYPE_LOCATION, 2, None, "You see a friend and ask them if they saw you yesterday. He tells you that he saw you briefly last night at Pi Kappa Theta with your roommate."))
-        quests.append(Quest(3, "Go to Brown", 2, QTYPE_LOCATION, 0, None, "You go home and see your roommate on his bed. He tells you that he doesn’t remember much thinks you went to Waffle House."))
-        quests.append(Quest(4, "Go to Pi Kappa Theta", 2, QTYPE_LOCATION, 1, None, "You see a fraternity member at the front of the house. He waves to you and says that he enjoyed meeting you last night and wants to extend a bid to you."))
-    if (last_quest_id == 3):
-        quests.append(Quest(5, "Go to Waffle House", 4, QTYPE_LOCATION, 3, None, "You're in Waffle House. Congrats."))
-        quests.append(Quest(6, "Examine the wallet", 4, QTYPE_OTHER, None, None, "You examined your wallet. Nothing happened."))
+    if (last_quest_id == 0):
+        quests.append(Quest(1, "You wake up in Van Leer, and you don't recall the previous day. But you think something big happened.", -1, QTYPE_OTHER, None, None, None))
+        quests.append(Quest(2, "You reach into your pocket and see a receipt for Taco Bell. What would you like to do?", 0, QTYPE_OTHER, None, None, None))
+        quests.append(Quest(3, "Go to Taco Bell", 1, QTYPE_LOCATION, 2, None, "You see a friend and ask them if they saw you yesterday. He tells you that he saw you briefly last night at Pi Kappa Theta with your roommate."))
+        quests.append(Quest(4, "Go to Brown", 2, QTYPE_LOCATION, 0, None, "You go home and see your roommate on his bed. He tells you that he doesn't remember much thinks you went to Waffle House."))
+        quests.append(Quest(5, "Go to Pi Kappa Theta", 2, QTYPE_LOCATION, 1, None, "You see a fraternity member at the front of the house. He waves to you and says that he enjoyed meeting you last night and wants to extend a bid to you."))
+    if (last_quest_id == 4):
+        quests.append(Quest(6, "Go to Waffle House", 4, QTYPE_LOCATION, 3, None, "You're in Waffle House. Congrats."))
+        quests.append(Quest(7, "Examine the wallet", 4, QTYPE_OTHER, None, None, "You examined your wallet. Nothing happened."))
     return quests

@@ -9,6 +9,7 @@ class ARVJSONEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Quest):
             return {
+                'id': obj.id,
                 'desc': obj.desc, 
                 'trigger': obj.trigger,
                 'qtype': obj.qtype,
@@ -18,6 +19,7 @@ class ARVJSONEncoder(JSONEncoder):
             }
         if isinstance(obj, Location):
             return {
+                'id': obj.id,
                 'name': obj.name, 
                 'desc': obj.desc,
                 'lat': obj.lat,
@@ -31,8 +33,9 @@ class ARVJSONEncoder(JSONEncoder):
             }
         if isinstance(obj, Person):
             return {
+                'id': obj.id,
                 'name': obj.name, 
-                'description': obj.description,
+                'description': obj.desc,
                 'location': obj.location,
             }
         if isinstance(obj, Item):
