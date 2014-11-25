@@ -4,3 +4,6 @@ class Person:
         self.name = name
         self.desc = desc
         self.location = location
+
+def get_people_pool():
+    return []

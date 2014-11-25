@@ -8,3 +8,6 @@ class Location:
         self.lat = lat
         self.lon = lon
         self.radius = radius
+
+def get_location_pool():
+    return []
