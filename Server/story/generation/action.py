@@ -41,3 +41,13 @@ class GetItemAction(Action):
         
     def generate_text(self, state, agent):
         return "%s found %s" % (agent.get_name(), self.item.get_name())
+    
+class ExamineItemAction(Action):
+    def __init__(self, item):
+        self.item = item
+        
+    def apply(self, state):
+        #state.get_items().append(self.item)
+        
+    def generate_text(self, state, agent):
+        return "%s examined %s" % (agent.get_name(), self.item.get_name())
