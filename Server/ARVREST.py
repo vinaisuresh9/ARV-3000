@@ -2,11 +2,11 @@
 
 from flask import Flask, jsonify, make_response, abort, request
 from json import JSONEncoder
-from story.entity.quest import *
-from story.entity.dialog import *
-from story.entity.item import *
-from story.entity.location import *
-from story.entity.person import *
+from story.generation.entity.quest import *
+from story.generation.entity.dialog import *
+from story.generation.entity.item import *
+from story.generation.entity.location import *
+from story.generation.entity.person import *
 from story.quests import *
 from ARVJSONEncoder import *
 

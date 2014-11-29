@@ -1,6 +1,6 @@
-from entity.location import Location
-from entity.person import Person
-from entity.quest import Quest
+from story.generation.entity.location import Location
+from story.generation.entity.person import Person
+from story.generation.entity.quest import Quest
 
 QTYPE_LOCATION = "QTYPE_LOCATION"
 QTYPE_DIALOG = "QTYPE_DIALOG"
