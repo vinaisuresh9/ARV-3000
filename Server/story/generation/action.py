@@ -15,11 +15,11 @@ class MoveAction(Action):
     def __init__(self, location):
         self.new_location = location
         
-    def apply(self, state):
-        state.set_current_location(self.new_location)
+    def apply(self, state, agent):
+        agent.get_state().set_current_location(self.new_location)
         
     def generate_text(self, state, agent):
-        return "%s went to %s" % (agent.get_name(), state.get_current_location().get_name())
+        return "%s went to %s" % (agent.get_name(), self.new_location.get_name())
         
 class ExamineLocationAction(Action):
     def __init__(self, current_location):
@@ -30,7 +30,7 @@ class ExamineLocationAction(Action):
         pass
     
     def generate_text(self, state, agent):
-        return "%s looked around %s" % (agent.get_name(), state.get_current_location().get_name())
+        return "%s looked around %s" % (agent.get_name(), agent.get_state().get_current_location().get_name())
     
 class GetItemAction(Action):
     def __init__(self, item):
@@ -47,7 +47,7 @@ class ExamineItemAction(Action):
         self.item = item
         
     def apply(self, state):
-        #state.get_items().append(self.item)
+        state.get_items().append(self.item)
         
     def generate_text(self, state, agent):
         return "%s examined %s" % (agent.get_name(), self.item.get_name())
