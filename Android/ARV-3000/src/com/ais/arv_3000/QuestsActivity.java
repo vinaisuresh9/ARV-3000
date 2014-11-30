@@ -2,6 +2,9 @@ package com.ais.arv_3000;
 
 import java.util.ArrayList;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
@@ -13,6 +16,7 @@ import android.widget.ListView;
 
 public class QuestsActivity extends ListActivity {
 	private ArrayList<String> quests = new ArrayList<String>();
+	ArrayList<String> arr = null;
 	private ArrayAdapter<String> adapter;
 	private int count;
 	
@@ -21,32 +25,25 @@ public class QuestsActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_quests);
 		
-		if(this.getIntent().hasExtra("QuestCount"))
-			this.count = this.getIntent().getIntExtra("QuestCount", 0);
+		if(this.getIntent().hasExtra("quests")) {
+			arr = this.getIntent().getStringArrayListExtra("quests");
+		}
 		adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, quests);
-		addItems();
+		try {
+			addItems();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		setListAdapter(adapter);
 	}
 	
 	//METHOD WHICH WILL HANDLE DYNAMIC INSERTION
-    public void addItems() {
+    public void addItems() throws JSONException {
     	//Query to backend for the quests
-    	if(count == 0) {
-    		adapter.add("Go to Taco Bell");
-    	} else if(count == 1) {
-    		adapter.clear();
-    		adapter.add("Go to Brown");
-    		adapter.add("Go to Pi Kappa Theta");
-    		adapter.notifyDataSetChanged();
-    	} else {
-    		adapter.clear();
-    		adapter.add("Examine wallet");
-    		adapter.add("Go to Waffle House");
-    		adapter.notifyDataSetChanged();
+    	for(int i=0; i<arr.size(); i++) {
+    		adapter.add((new JSONObject(arr.get(i))).getString("desc"));
     	}
-		//adapter.add("Talk to shopkeeper.");
-		//adapter.add("go to dorm.");
-		//adapter.add("go to library");
     }
     
     @Override
@@ -55,23 +52,8 @@ public class QuestsActivity extends ListActivity {
         super.onListItemClick(l, v, position, id);
         
         Intent goOnQuest = new Intent(QuestsActivity.this, MapTextActivity.class);
-        goOnQuest.putExtra("Quest_choice", (String)getListView().getItemAtPosition(position));
-        goOnQuest.putExtra("StoryCount", this.getIntent().getExtras().getString("StoryCount"));
-        String[] newLoc = new String[2];
-        if(count == 0) {
-        	newLoc[0] = "33.772626";
-        	newLoc[1] = "-84.373187";
-        }
-        else if(count == 1) {
-	        if(((String)getListView().getItemAtPosition(position)).equals("Go to Brown")) {
-	        	newLoc[0] = "33.771846";
-	        	newLoc[1] = "-84.391845";
-	    	} else {
-	        	newLoc[0] = "33.776595";
-	        	newLoc[1] = "-84.393851";
-	        }
-        }
-        goOnQuest.putExtra("LocValue", newLoc);
+        goOnQuest.putExtra("Quest_choice", arr.get(position));
+        goOnQuest.putExtra("demo", true);
         startActivity(goOnQuest);
         finish();
     }

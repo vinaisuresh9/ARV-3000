@@ -51,4 +51,14 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/white" />
 
+    <CheckBox
+        android:id="@+id/demo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:button="@xml/custom_checkbox"
+        android:text="@string/demo"
+        android:textColor="@color/white" />
+
 </RelativeLayout>

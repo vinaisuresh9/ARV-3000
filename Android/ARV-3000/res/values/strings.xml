@@ -11,6 +11,7 @@
     <string name="startBtn">Start</string>
     <string name="loadingQuests">Loading quest data...</string>
     <string name="next">Next</string>
+    <string name="demo">Demo?</string>
     
     <!-- Colors -->
     <color name="black">#000000</color>

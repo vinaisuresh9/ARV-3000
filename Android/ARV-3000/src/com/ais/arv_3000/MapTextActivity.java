@@ -1,5 +1,12 @@
 package com.ais.arv_3000;
 
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +15,7 @@ import android.graphics.Point;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -21,10 +29,11 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.LocationSource;
+import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -41,10 +50,16 @@ public class MapTextActivity extends Activity {
 	private static final String POINT_LONGITUDE_KEY = "POINT_LONGITUDE_KEY";
 	
 	private int count = 0;
+	private int storyId;
+	private float distance = 15;
 	
-	//For mock Locations
-	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 	private Marker current;
+	private double lat=0, lon=0;
+	private LatLngBounds.Builder builder = new LatLngBounds.Builder();
+	private int questArrIndex = 0;
+    private JSONArray arr = null;
+    private boolean demo;
+    private boolean done = true;
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +77,8 @@ public class MapTextActivity extends Activity {
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
         map.setMyLocationEnabled(true);
         
+        map.clear();
+        
         if(map != null) {
         	map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
 				
@@ -70,47 +87,92 @@ public class MapTextActivity extends Activity {
 					LatLng point = new LatLng(arg0.getLatitude(), arg0.getLongitude());
 					current = map.addMarker(new MarkerOptions()
 			        .position(point)
-			        .title("Current Location"));
+			        .title("You are here!"));
 					map.animateCamera(CameraUpdateFactory.newLatLngZoom(point, 15));
-					current.remove();
+					map.setOnCameraChangeListener(new OnCameraChangeListener() {
+						
+						@Override
+						public void onCameraChange(CameraPosition arg0) {
+							map.moveCamera(CameraUpdateFactory.newLatLngZoom(arg0.target, arg0.zoom));
+						}
+					});
 				}
 			});
         }
         
+        if(this.getIntent().hasExtra("storyId")) {
+        	storyId = this.getIntent().getIntExtra("storyId", 1);
+        }
+        
+        if(this.getIntent().hasExtra("demo")) {
+        	demo = this.getIntent().getBooleanExtra("demo", false);
+        }
+        
         final TextView storyline = (TextView) findViewById(R.id.storyTextView);
-        String s = "You wake up in Van Leer, and you don’t recall the previous day. But you think something big happened."; //query here like 10-15
+        AsyncTask<String, String, String> request;
+        JSONObject questJson;
+        String s="";
+        JSONObject obj = null;
         if(this.getIntent().hasExtra("Quest_choice")) {
         	//get story info from quest path chosen, below assuming shopkeeper path chosen
-        	String[] loc = this.getIntent().getExtras().getStringArray("LocValue");
-        	saveCoordinatesInPreferences(Float.parseFloat(loc[0]),Float.parseFloat(loc[1]));
-        	LatLng newLoc = new LatLng(Double.parseDouble(loc[0]), Double.parseDouble(loc[1]));
-        	//locMan = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        	//locMan.requestLocationUpdates(
-        	//		LocationManager.GPS_PROVIDER,
-        	//		MINIMUM_TIME_BETWEEN_UPDATE,
-        	//		MINIMUM_DISTANCECHANGE_FOR_UPDATE,
-        	//		new MyLocationListener());
+        	try {
+				obj = new JSONObject(this.getIntent().getStringExtra("Quest_choice"));
+				s = obj.getString("result");
+				int questId = obj.getInt("id");
+				String locName="ERROR";
+				try {
+					lat = obj.getJSONObject("location").getDouble("lat");
+					lon = obj.getJSONObject("location").getDouble("lon");
+					locName = obj.getJSONObject("location").getString("desc");
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				LatLng point = new LatLng(lat, lon);
+				current = map.addMarker(new MarkerOptions()
+		        .position(point)
+		        .title(locName));
+				request = new RequestTask().execute(MainActivity.hostApi+"get_available_quests/"+storyId+"/"+questId);
+				questJson = new JSONObject(request.get().toString());
+				arr = questJson.getJSONArray("quests");
+				questArrIndex = 0;
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+//        	saveCoordinatesInPreferences(Float.parseFloat(loc[0]),Float.parseFloat(loc[1]));
+//        	LatLng newLoc = new LatLng(Double.parseDouble(loc[0]), Double.parseDouble(loc[1]));
+//        	locMan = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+//        	locMan.requestLocationUpdates(
+//        			LocationManager.GPS_PROVIDER,
+//        			MINIMUM_TIME_BETWEEN_UPDATE,
+//        			MINIMUM_DISTANCECHANGE_FOR_UPDATE,
+//        			new MyLocationListener());
         	
-        	//For demo
-        	current = map.addMarker(new MarkerOptions()
-            	.position(newLoc)
-            	.title("Current Location"));
-        	map.animateCamera(CameraUpdateFactory.newLatLngZoom(newLoc, 15));
-        	
-        	String choice = this.getIntent().getExtras().getString("Quest_choice");
-        	if(choice.equals("Go to Taco Bell")) {
-        		s = "You see a friend and ask them if they saw you yesterday. He tells you that he saw you briefly last night at Pi Kappa Theta with your roommate.";
-        		count = this.getIntent().getExtras().getInt("StoryCount");
-				count += 2;
-        	} else if(choice.equals("Go to Brown")) {
-        		s = "You go home and see your roommate on his bed. He tells you that he doesn’t remember much thinks you went to Waffle House.";
-        		count = this.getIntent().getExtras().getInt("StoryCount");
-        		count += 5;
-        	} else if(choice.equals("Go to Pi Kappa Theta")) {
-        		s = "You see a fraternity member at the front of the house. He waves to you and says that he enjoyed meeting you last night and wants to extend a bid to you.";
-        		count = this.getIntent().getExtras().getInt("StoryCount");
-        		count += 6;
-        	}
+        } else {
+        	try {
+        		request = new RequestTask().execute(MainActivity.hostApi+"get_available_quests/0/"+storyId);
+    			questJson = new JSONObject(request.get().toString());
+    			arr = questJson.getJSONArray("quests");
+    			obj = arr.getJSONObject(questArrIndex);
+    			s = obj.getString("desc");
+    			questArrIndex += 1;
+    		} catch (JSONException e) {
+    			// TODO Auto-generated catch block
+    			Log.e("JSONException", "Could not retrieve from database");
+    		} catch (InterruptedException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		} catch (ExecutionException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}
         }
         storyline.setText(s);
         
@@ -119,42 +181,104 @@ public class MapTextActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				Log.d("Story Counts", ""+count);
-				if(count == 0) {
-					storyline.setText("You reach into your pocket and see a receipt for Taco Bell. What would you like to do?");
-					count += 1;
-				} else if(count == 1) {
-					quest = true;
-				} else if(count == 2) {
-					quest = true;
-				} else if(count == 5) {
-					storyline.setText("He also hands you your wallet, which you had dropped last night.");
-					count += 1;
-				} else if(count == 6) {
-					quest = true;
-				}
-				//quest = Boolean.parseBoolean("false");//Query again
-				if(quest) {
-					Intent questList = new Intent(MapTextActivity.this, QuestsActivity.class);
-					if(count == 1) {
-						questList.putExtra("QuestCount",0);
-						questList.putExtra("StoryCount", count);
-						quest = false;
-					} else if(count == 2) {
-						questList.putExtra("QuestCount",1);
-						questList.putExtra("StoryCount", count);
-						quest = false;
-					} else if(count == 6) {
-						questList.putExtra("QuestCount",2);
-						questList.putExtra("StoryCount", count);
-						quest = false;
+				JSONObject obj = null;
+				try {
+					obj = arr.getJSONObject(questArrIndex);
+					if(obj.getString("result").equals("null")) {
+						quest = false; 
+					} else {
+						quest = true;
 					}
+				} catch (JSONException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				Log.d("quest?", ""+quest);
+				Log.d("demo?",""+demo);
+				if(quest && demo) {
+					Intent questList = new Intent(MapTextActivity.this, QuestsActivity.class);
+					ArrayList<String> quests = new ArrayList<String>();
+					while(questArrIndex < arr.length()) {
+						try {
+							if(!arr.getJSONObject(questArrIndex).getString("result").equals("null")) {
+								quests.add(arr.getJSONObject(questArrIndex).toString());
+								questArrIndex++;
+							}
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					questList.putStringArrayListExtra("quests", quests);
 					startActivity(questList);
 					finish();
-				}
-				else {
-					//query next part of story
-					//storyline.setText(s);
+				}  else if(quest && !demo) {
+					ArrayList<JSONObject> locs = new ArrayList<JSONObject>();
+					v.setEnabled(false);
+					done = false;
+					while(questArrIndex < arr.length()) {
+						try {
+							if(!arr.getJSONObject(questArrIndex).getString("result").equals("null")) {
+								locs.add(arr.getJSONObject(questArrIndex).getJSONObject("location"));
+								questArrIndex++;
+							}
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					int k = 0;
+					for(int i=0; i<locs.size(); i++) {
+						String locName="ERROR";
+						try {
+							JSONObject lo = locs.get(i);
+							lat = locs.get(i).getDouble("lat");
+							lon = locs.get(i).getDouble("lon");
+							locName = locs.get(i).getString("desc");
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							done = true;
+						}
+						LatLng point = new LatLng(lat, lon);
+						storyline.setText("Choose a location and head over, when you get within 6 feet, you will meet someone/see something new.");
+						Marker newMarker = map.addMarker(new MarkerOptions()
+				        .position(point)
+				        .title(locName));
+						builder.include(newMarker.getPosition());
+					}
+					while(!done) {
+						for(int i=0; i<locs.size(); i++) {
+							new Thread(new Runnable() {
+								@Override
+								public void run() {
+									AsyncTask<Double,String,Boolean> task = new CheckDistance().execute(lat,lon);
+									try {
+										done = task.get();
+										Log.d("done?", ""+done);
+									} catch (InterruptedException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									} catch (ExecutionException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+							});
+						}
+						Log.d("done?", ""+done);
+					}
+				} else if(!quest) {
+					String s = "";
+					try {
+						obj = arr.getJSONObject(questArrIndex);
+						questArrIndex++;
+						s = obj.getString("desc");
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					storyline.setText(s);
 				}
 			}
 		});
@@ -180,16 +304,18 @@ public class MapTextActivity extends Activity {
 		location.setLongitude(prefs.getFloat(POINT_LONGITUDE_KEY, 0));
         return location;
 	}
-
 	
 	public class MyLocationListener implements LocationListener {
 
 		@Override
 		public void onLocationChanged(Location arg0) {
 			Location pointLocation = retrievelocationFromPreferences();
-			float distance = arg0.distanceTo(pointLocation);
-			Toast.makeText(MapTextActivity.this,
+			distance = arg0.distanceTo(pointLocation);
+			if(distance <= 6) {
+				Toast.makeText(MapTextActivity.this,
 					"Distance from Point:"+distance, Toast.LENGTH_LONG).show();
+				done = true;
+			}
 		}
 
 		@Override
@@ -199,4 +325,18 @@ public class MapTextActivity extends Activity {
 		@Override
 		public void onProviderDisabled(String provider) {}
 	}
+	
+	private class CheckDistance extends AsyncTask<Double, String, Boolean> {
+		@Override
+		protected Boolean doInBackground(Double... params) {
+			saveCoordinatesInPreferences((float)params[0].floatValue(),(float)params[1].floatValue());
+			locMan = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        	locMan.requestLocationUpdates(
+        			LocationManager.GPS_PROVIDER,
+        			MINIMUM_TIME_BETWEEN_UPDATE,
+        			MINIMUM_DISTANCECHANGE_FOR_UPDATE,
+        			new MyLocationListener());
+			return true;
+		}
+	 }
 }
