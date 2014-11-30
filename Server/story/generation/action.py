@@ -1,5 +1,5 @@
-from entity.item import Item
-from entity.location import Location
+from story.generation.entity.item import Item
+from story.generation.entity.location import Location
 
 class Action:
     def __init__(self):

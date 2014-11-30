@@ -22,6 +22,7 @@ class AgentState:
         self.lost_memory = False
         self.moves = 0
         self.people = []
+        self.memory_recovered = False
 
     def get_current_location(self):
         return self.current_location
@@ -49,3 +50,9 @@ class AgentState:
 
     def inc_moves(self):
         self.moves += 1
+
+    def is_memory_recovered(self):
+        return self.memory_recovered
+
+    def set_memory_recovered(self, memory):
+        self.memory_recovered = memory

@@ -1,10 +1,11 @@
-from state import WorldState
-from action import *
-from agent import HeroAgent
+from story.generation.state import WorldState
+from story.generation.action import *
+from story.generation.agent import HeroAgent, ReverseHeroAgent
+from story.generation.entity.quest import Quest
 
-import entity.location
-import entity.item
-import entity.person
+import story.generation.entity.location
+import story.generation.entity.item
+import story.generation.entity.person
 import random
 
 class World:
@@ -12,6 +13,9 @@ class World:
         self.state = WorldState(location_pool, item_pool, person_pool)
         self.agent = agent
         self.history = []
+
+    def set_agent(self, agent):
+        self.agent = agent
 
     def get_agent(self):
         return self.agent
@@ -21,15 +25,17 @@ class World:
         actions['general'] = []
         actions['move'] = []
         actions['lose_memory'] = []
+        actions['reverse'] = []
 
         astate = agent.get_state()
 
-        for location in self.state.get_location_pool():
-            if location.id != agent.get_state().get_current_location().id:
-                actions['move'].append(MoveAction(location))
 
         # Applies only for Hero
         if agent.__class__.__name__ == 'HeroAgent':
+            for location in self.state.get_location_pool():
+                if location.id != astate.get_current_location().id:
+                    actions['move'].append(MoveAction(location))
+
             for item in astate.get_items():
                 actions['general'].append(LoseItemAction(item))
 
@@ -44,8 +50,7 @@ class World:
 
         # Applies only for ReverseHero
         if agent.__class__.__name__ == 'ReverseHeroAgent':
-            if astate.get_current_location() not in astate.get_examined_locations():
-                actions['general'].append(ExamineLocationAction(astate.get_current_location()))
+            pass
 
         return actions
 
@@ -58,14 +63,27 @@ class World:
     def get_history(self):
         return self.history
 
-if __name__ == "__main__":
-    location_pool = entity.location.get_location_pool()
-    inventory = entity.item.get_inventory()
+    def set_reverse(self):
+        self.reverse = self.history
+        self.history = []
+
+def generate_quests(world):
+    id = 0
+    quests = []
+    for action in world.get_history():
+        q = Quest(id, action.generate_text(world.get_agent()), id - 1, "QTYPE_OTHER", None, None, None)
+        quests.append(q)
+        id += 1
+    return quests
+
+def generate_story():
+    location_pool = story.generation.entity.location.get_location_pool()
+    person_pool = story.generation.entity.person.get_people_pool()
+    item_pool = story.generation.entity.item.get_item_pool()
+    inventory = story.generation.entity.item.get_inventory()
     agent = HeroAgent("Hero", random.choice(location_pool), inventory)
-    world = World(agent, location_pool, entity.item.get_item_pool(), entity.person.get_people_pool())
+    world = World(agent, list(location_pool), list(item_pool), list(person_pool))
 
     while not world.get_agent().get_state().is_lost_memory():
         world.progress_turn()
-
-    for action in world.get_history():
-        print(action.generate_text(world.get_agent()))
+    return (generate_quests(world), location_pool, person_pool, inventory + item_pool)
