@@ -1,5 +1,6 @@
 from story.generation.entity.item import Item
 from story.generation.entity.location import Location
+from story.generation.entity.quest import Quest
 
 class Action:
     def __init__(self):
@@ -11,6 +12,9 @@ class Action:
     def generate_text(self, agent):
         return ""
 
+    def generate_quest(self, id, trigger_id):
+        return Quest(id, "Blank", trigger_id, "QTYPE_OTHER", None, None, None)
+
 # Generic Actions
 
 class MoveAction(Action):
@@ -18,11 +22,15 @@ class MoveAction(Action):
         self.new_location = location
         
     def apply(self, state, agent):
+        self.old_location = agent.get_state().get_current_location()
         agent.get_state().set_current_location(self.new_location)
         agent.get_state().inc_moves()
         
     def generate_text(self, agent):
         return "%s went to %s" % (agent.get_name(), self.new_location.get_name())
+
+    def generate_quest(self, id, trigger_id):
+        return Quest(id, "Go to %s" % self.old_location.get_name(), trigger_id, "QTYPE_LOCATION", self.old_location, None, None)
 
 class GetItemAction(Action):
     def __init__(self, item):
@@ -36,6 +44,9 @@ class GetItemAction(Action):
     def generate_text(self, agent):
         return "%s found %s" % (agent.get_name(), self.item.get_name())
 
+    def generate_quest(self, id, trigger_id):
+        return Quest(id, "Ah! This is where you found %s that is currently in your pocket." % self.item.get_name(), trigger_id, "QTYPE_OTHER", None, None, None)
+
 class TalkPersonAction(Action):
     def __init__(self, person):
         self.person = person
@@ -47,6 +58,9 @@ class TalkPersonAction(Action):
 
     def generate_text(self, agent):
         return "%s talked to %s" % (agent.get_name(), self.person.get_name())
+
+    def generate_quest(self, id, trigger_id):
+        return Quest(id, "You see %s. You remember talking to him yesterday in the same place." % self.person.get_name(), trigger_id, "QTYPE_OTHER", None, None, None)
 
 # Hero Only Actions
 
@@ -61,6 +75,10 @@ class GetDrunkAction(Action):
     def generate_text(self, agent):
         return "%s got drunk and lost his memory" % agent.get_name()
 
+    def generate_quest(self, id, trigger_id):
+        return Quest(id, "You wake up with a hungover. It looks like you partied too hard and now can't remember what happened last night.",
+                trigger_id, "QTYPE_OTHER", None, None, None)
+
 class HitWallAction(Action):
     def __init__(self):
         pass
@@ -72,6 +90,10 @@ class HitWallAction(Action):
     def generate_text(self, agent):
         return "%s walked into a wall and lost his memory" % agent.get_name()
 
+    def generate_quest(self, id, trigger_id):
+        return Quest(id, "You wake up and notice that you have a headache. Looks like you hit something pretty hard and now can't remember what happened.",
+                trigger_id, "QTYPE_OTHER", None, None, None)
+
 class LoseItemAction(Action):
     def __init__(self, item):
         self.item = item
@@ -82,6 +104,9 @@ class LoseItemAction(Action):
 
     def generate_text(self, agent):
         return "%s lost his %s" % (agent.get_name(), self.item.get_name())
+
+    def generate_quest(self, id, trigger_id):
+        return Quest(id, "While examining your current location, you have found your %s! You're lucky it is still here." % self.item.get_name(), trigger_id, "QTYPE_OTHER", None, None, None)
 
 # Reverse Hero Only Actions
         

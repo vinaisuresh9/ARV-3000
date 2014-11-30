@@ -1,7 +1,6 @@
 from story.generation.state import WorldState
 from story.generation.action import *
 from story.generation.agent import HeroAgent, ReverseHeroAgent
-from story.generation.entity.quest import Quest
 
 import story.generation.entity.location
 import story.generation.entity.item
@@ -70,8 +69,9 @@ class World:
 def generate_quests(world):
     id = 0
     quests = []
+    world.get_history().reverse()
     for action in world.get_history():
-        q = Quest(id, action.generate_text(world.get_agent()), id - 1, "QTYPE_OTHER", None, None, None)
+        q = action.generate_quest(id, id-1)
         quests.append(q)
         id += 1
     return quests
