@@ -19,13 +19,14 @@ class World:
     def get_available_actions(self, agent):
         actions = {}
         actions['general'] = []
+        actions['move'] = []
         actions['lose_memory'] = []
 
         astate = agent.get_state()
 
         for location in self.state.get_location_pool():
             if location.id != agent.get_state().get_current_location().id:
-                actions['general'].append(MoveAction(location))
+                actions['move'].append(MoveAction(location))
 
         # Applies only for Hero
         if agent.__class__.__name__ == 'HeroAgent':
