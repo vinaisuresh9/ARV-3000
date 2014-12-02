@@ -25,13 +25,13 @@ class HeroAgent(Agent):
     def choose_action(self, state, actions):
         if self.moved:
             self.moved = False
-            return random.choice(actions['general'])
-        else:
-            self.moved = True
             if self.state.moves < 10:
-                return random.choice(actions['move'])
+                return random.choice(actions['general'])
             else:
                 return random.choice(actions['lose_memory'])
+        else:
+            self.moved = True
+            return random.choice(actions['move'])
         
 class ReverseHeroAgent(Agent):
     def __init__(self, name, initial_location, action_history, items):

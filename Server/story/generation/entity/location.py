@@ -42,4 +42,4 @@ def get_location_pool():
     locations.append(Location(23, "Georgia Tech Hotel", "",  33.776331,-84.388992, None))
     locations.append(Location(24, "Burger Bowl", "",   33.778364, -84.403001, None))
     locations.append(Location(25, "E. Roe Stamps IV Field", "",   33.776755, -84.402738, None))
-    return random.sample(locations, 5)
+    return random.sample(locations, 10)

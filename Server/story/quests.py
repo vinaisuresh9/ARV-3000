@@ -19,14 +19,14 @@ def create_story(client_id):
 # Returns list of locations for given story id
 def get_locations(story_id):
     if story_id in stories:
-        return stories[story_id][1]
+        return stories[story_id].get_locations()
     else:
         return []
 
 # Returns list of people for given story id
 def get_people(story_id):
     if story_id in stories:
-        return stories[story_id][2]
+        return stories[story_id].get_people()
     else:
         return []
 
@@ -43,5 +43,5 @@ def get_quests(story_id, last_quest_id):
     #     quests.append(Quest(6, "Go to Waffle House", 4, QTYPE_LOCATION, Location(3, "Waffle House", "Waffle House", 33.772626, -84.373187, 5), None, "You're in Waffle House. Congrats."))
     #     quests.append(Quest(7, "Examine the wallet", 4, QTYPE_OTHER, None, None, "You examined your wallet. Nothing happened."))
     if story_id in stories:
-        quests = stories[story_id][0]
+        quests = stories[story_id].generate_quests(last_quest_id)
     return quests

@@ -11,3 +11,6 @@ class Quest (JSONEncoder) :
         self.location = location
         self.dialog = dialog
         self.result = result
+
+    def get_id(self):
+        return self.id
