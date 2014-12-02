@@ -5,9 +5,7 @@ import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -18,7 +16,6 @@ public class QuestsActivity extends ListActivity {
 	private ArrayList<String> quests = new ArrayList<String>();
 	ArrayList<String> arr = null;
 	private ArrayAdapter<String> adapter;
-	private int count;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +29,6 @@ public class QuestsActivity extends ListActivity {
 		try {
 			addItems();
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		setListAdapter(adapter);
@@ -48,11 +44,11 @@ public class QuestsActivity extends ListActivity {
     
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        // TODO Auto-generated method stub
         super.onListItemClick(l, v, position, id);
         
         Intent goOnQuest = new Intent(QuestsActivity.this, MapTextActivity.class);
         goOnQuest.putExtra("Quest_choice", arr.get(position));
+        goOnQuest.putExtra("drawMarker", true);
         goOnQuest.putExtra("demo", true);
         startActivity(goOnQuest);
         finish();

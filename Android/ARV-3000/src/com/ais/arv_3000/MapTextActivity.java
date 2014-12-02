@@ -14,7 +14,6 @@ import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.location.Location;
 import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,33 +32,25 @@ import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapTextActivity extends Activity {
 	private GoogleMap map;
 	private int SCREEN_HEIGHT;
 	private boolean quest = false;
-	private boolean moreStory = false;
-	private LocationManager locMan;
-	private static final long MINIMUM_DISTANCECHANGE_FOR_UPDATE = 1; // in Meters
-	private static final long MINIMUM_TIME_BETWEEN_UPDATE = 1000; // in Milliseconds
 	
 	private static final String POINT_LATITUDE_KEY = "POINT_LATITUDE_KEY";
 	private static final String POINT_LONGITUDE_KEY = "POINT_LONGITUDE_KEY";
 	
-	private int count = 0;
 	private int storyId;
 	private float distance = 15;
 	
-	private Marker current;
-	private double lat=0, lon=0;
-	private LatLngBounds.Builder builder = new LatLngBounds.Builder();
+	private Location currentLoc= null;
 	private int questArrIndex = 0;
     private JSONArray arr = null;
     private boolean demo;
     private boolean done = true;
+    private ArrayList<JSONObject> locs = new ArrayList<JSONObject>();
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,14 +72,12 @@ public class MapTextActivity extends Activity {
         
         if(map != null) {
         	map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-				
 				@Override
 				public void onMyLocationChange(Location arg0) {
-					LatLng point = new LatLng(arg0.getLatitude(), arg0.getLongitude());
-					current = map.addMarker(new MarkerOptions()
-			        .position(point)
-			        .title("You are here!"));
-					map.animateCamera(CameraUpdateFactory.newLatLngZoom(point, 15));
+					currentLoc = new Location("My Loc");
+					currentLoc.setLatitude(arg0.getLatitude());
+					currentLoc.setLongitude(arg0.getLongitude());
+					map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLoc.getLatitude(),currentLoc.getLongitude()), 15));
 					map.setOnCameraChangeListener(new OnCameraChangeListener() {
 						
 						@Override
@@ -118,69 +107,67 @@ public class MapTextActivity extends Activity {
         	try {
 				obj = new JSONObject(this.getIntent().getStringExtra("Quest_choice"));
 				s = obj.getString("result");
+				storyline.setText(s);
 				int questId = obj.getInt("id");
-				String locName="ERROR";
-				try {
-					lat = obj.getJSONObject("location").getDouble("lat");
-					lon = obj.getJSONObject("location").getDouble("lon");
-					locName = obj.getJSONObject("location").getString("desc");
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				if(this.getIntent().hasExtra("drawMarker")) {
+					String locName="ERROR";
+					double lat=0, lon=0;
+					try {
+						lat = obj.getDouble("lat");
+						lon = obj.getDouble("lon");
+						locName = obj.getString("desc");
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+					map.addMarker(new MarkerOptions()
+							.position(new LatLng(lat, lon))
+							.title(locName));
 				}
-				LatLng point = new LatLng(lat, lon);
-				current = map.addMarker(new MarkerOptions()
-		        .position(point)
-		        .title(locName));
 				request = new RequestTask().execute(MainActivity.hostApi+"get_available_quests/"+storyId+"/"+questId);
 				questJson = new JSONObject(request.get().toString());
 				arr = questJson.getJSONArray("quests");
 				questArrIndex = 0;
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-//        	saveCoordinatesInPreferences(Float.parseFloat(loc[0]),Float.parseFloat(loc[1]));
-//        	LatLng newLoc = new LatLng(Double.parseDouble(loc[0]), Double.parseDouble(loc[1]));
-//        	locMan = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-//        	locMan.requestLocationUpdates(
-//        			LocationManager.GPS_PROVIDER,
-//        			MINIMUM_TIME_BETWEEN_UPDATE,
-//        			MINIMUM_DISTANCECHANGE_FOR_UPDATE,
-//        			new MyLocationListener());
-        	
         } else {
         	try {
         		request = new RequestTask().execute(MainActivity.hostApi+"get_available_quests/0/"+storyId);
     			questJson = new JSONObject(request.get().toString());
     			arr = questJson.getJSONArray("quests");
+    			if(arr.length() == 0) {
+					Intent end = new Intent(MapTextActivity.this, EndActivity.class);
+					startActivity(end);
+					finish();
+				}
     			obj = arr.getJSONObject(questArrIndex);
     			s = obj.getString("desc");
     			questArrIndex += 1;
     		} catch (JSONException e) {
-    			// TODO Auto-generated catch block
     			Log.e("JSONException", "Could not retrieve from database");
     		} catch (InterruptedException e) {
-    			// TODO Auto-generated catch block
     			e.printStackTrace();
     		} catch (ExecutionException e) {
-    			// TODO Auto-generated catch block
     			e.printStackTrace();
     		}
         }
         storyline.setText(s);
         
         Button textQuestButton = (Button) findViewById(R.id.nextQuestButton);
+        textQuestButton.setEnabled(true);
         textQuestButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
+				if(arr.length() == 0) {
+					Intent end = new Intent(MapTextActivity.this, EndActivity.class);
+					startActivity(end);
+					finish();
+				}
 				JSONObject obj = null;
 				try {
 					obj = arr.getJSONObject(questArrIndex);
@@ -190,7 +177,6 @@ public class MapTextActivity extends Activity {
 						quest = true;
 					}
 				} catch (JSONException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				Log.d("quest?", ""+quest);
@@ -205,7 +191,6 @@ public class MapTextActivity extends Activity {
 								questArrIndex++;
 							}
 						} catch (JSONException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}
@@ -213,59 +198,60 @@ public class MapTextActivity extends Activity {
 					startActivity(questList);
 					finish();
 				}  else if(quest && !demo) {
-					ArrayList<JSONObject> locs = new ArrayList<JSONObject>();
-					v.setEnabled(false);
-					done = false;
-					while(questArrIndex < arr.length()) {
-						try {
-							if(!arr.getJSONObject(questArrIndex).getString("result").equals("null")) {
-								locs.add(arr.getJSONObject(questArrIndex).getJSONObject("location"));
-								questArrIndex++;
-							}
-						} catch (JSONException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					int k = 0;
-					for(int i=0; i<locs.size(); i++) {
-						String locName="ERROR";
-						try {
-							JSONObject lo = locs.get(i);
-							lat = locs.get(i).getDouble("lat");
-							lon = locs.get(i).getDouble("lon");
-							locName = locs.get(i).getString("desc");
-						} catch (JSONException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-							done = true;
-						}
-						LatLng point = new LatLng(lat, lon);
-						storyline.setText("Choose a location and head over, when you get within 6 feet, you will meet someone/see something new.");
-						Marker newMarker = map.addMarker(new MarkerOptions()
-				        .position(point)
-				        .title(locName));
-						builder.include(newMarker.getPosition());
-					}
-					while(!done) {
-						for(int i=0; i<locs.size(); i++) {
-							new Thread(new Runnable() {
-								@Override
-								public void run() {
-									AsyncTask<Double,String,Boolean> task = new CheckDistance().execute(lat,lon);
-									try {
-										done = task.get();
-										Log.d("done?", ""+done);
-									} catch (InterruptedException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									} catch (ExecutionException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
+					Log.d("done?", ""+done);
+					if(done) {
+						done = false;
+						while(questArrIndex < arr.length()) {
+							try {
+								if(!arr.getJSONObject(questArrIndex).getString("result").equals("null")) {
+									Log.d("loc:",arr.getJSONObject(questArrIndex).getJSONObject("location").toString());
+									locs.add(arr.getJSONObject(questArrIndex).getJSONObject("location"));
+									questArrIndex++;
 								}
-							});
+							} catch (JSONException e) {
+								e.printStackTrace();
+							}
 						}
+//						try {
+//							locs.add(new JSONObject("{\"id\":3,\"radius\":5,\"lon\":-84.401513,\"desc\":null,\"lat\":33.779813,\"name\":\"Center Street\",\"result\":\"done! Congrats!\"}"));
+//						} catch (JSONException e1) {
+//							e1.printStackTrace();
+//						}
+						for(int i=0; i<locs.size(); i++) {
+							String locName="ERROR";
+							double lat = 0, lon = 0;
+							try {
+								lat = locs.get(i).getDouble("lat");
+								lon = locs.get(i).getDouble("lon");
+								locName = locs.get(i).getString("desc");
+							} catch (JSONException e) {
+								e.printStackTrace();
+								done = true;
+							}
+							LatLng point = new LatLng(lat, lon);
+							map.addMarker(new MarkerOptions()
+					        .position(point)
+					        .title(locName));
+						}
+						storyline.setText("Choose a location and head over, when you get within 30"
+								+ "feet of the location hit next.");
+					} else {
+						for(int i=0; i<locs.size(); i++) {
+							try {
+								saveCoordinatesInPreferences((float)locs.get(i).getDouble("lat"),(float)locs.get(i).getDouble("lon"));
+								done = checkDistance(locs.get(i).getString("name"),locs.get(i).getDouble("lat"),locs.get(i).getDouble("lon"));
+							} catch (JSONException e) {
+								e.printStackTrace();
+							}
+				        	if(done == true) {
+				        		Intent goOnQuest = new Intent(MapTextActivity.this, MapTextActivity.class);
+				                goOnQuest.putExtra("Quest_choice", locs.get(i).toString());
+				                startActivity(goOnQuest);
+				                finish();
+				        	}
+						}
+						if(done == false)
+							storyline.setText("You are not at any of the locations");
 						Log.d("done?", ""+done);
 					}
 				} else if(!quest) {
@@ -275,7 +261,6 @@ public class MapTextActivity extends Activity {
 						questArrIndex++;
 						s = obj.getString("desc");
 					} catch (JSONException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					storyline.setText(s);
@@ -326,17 +311,14 @@ public class MapTextActivity extends Activity {
 		public void onProviderDisabled(String provider) {}
 	}
 	
-	private class CheckDistance extends AsyncTask<Double, String, Boolean> {
-		@Override
-		protected Boolean doInBackground(Double... params) {
-			saveCoordinatesInPreferences((float)params[0].floatValue(),(float)params[1].floatValue());
-			locMan = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        	locMan.requestLocationUpdates(
-        			LocationManager.GPS_PROVIDER,
-        			MINIMUM_TIME_BETWEEN_UPDATE,
-        			MINIMUM_DISTANCECHANGE_FOR_UPDATE,
-        			new MyLocationListener());
+	public boolean checkDistance(String name, double lat, double lon) {
+		Location dest = new Location(name);
+		dest.setLatitude(lat);
+		dest.setLongitude(lon);
+		double dist = currentLoc.distanceTo(dest);
+		if(dist <= 30) {
 			return true;
 		}
-	 }
+		return false;
+	}
 }

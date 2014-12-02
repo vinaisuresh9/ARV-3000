@@ -9,7 +9,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -35,13 +34,10 @@ public class MainActivity extends Activity{
 					result = new JSONObject(request.get());
 					startIntent.putExtra("storyId", result.getInt("story_id"));
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				startIntent.putExtra("demo", checked);
@@ -49,4 +45,5 @@ public class MainActivity extends Activity{
 				finish();
 			}
 		});
-	}}
+	}
+}
