@@ -9,9 +9,12 @@
     <string name="teamname">Brought to you by the Ultraviolet Team.</string>
     <string name="startMsg">To begin, please click the Start button below.</string>
     <string name="startBtn">Start</string>
-    <string name="loadingQuests">Loading quest data...</string>
+    <string name="loadingQuests">Loading quest data&#8230;)</string>
     <string name="next">Next</string>
     <string name="demo">Demo?</string>
+    <string name="gameover">Game Over!</string>
+    <string name="completion">Completion:</string>
+    <string name="newgame">New Game?</string>
     
     <!-- Colors -->
     <color name="black">#000000</color>
