@@ -28,7 +28,7 @@ class MoveAction(Action):
         state.get_location_pool().remove(self.new_location)
         
     def generate_text(self, agent):
-        return "%s went to %s" % (agent.get_name(), self.new_location.get_name())
+        return "%s went to %s." % (agent.get_name(), self.new_location.get_name())
 
 class GetItemAction(Action):
     def __init__(self, item):
@@ -40,7 +40,7 @@ class GetItemAction(Action):
         state.get_item_pool().remove(self.item)
         
     def generate_text(self, agent):
-        return "%s found %s" % (agent.get_name(), self.item.get_name())
+        return "%s found %s." % (agent.get_name(), self.item.get_name())
 
     def gen_quest_text(self):
         return "Ah! This is where you found %s that is currently in your pocket." % self.item.get_name()
@@ -55,7 +55,7 @@ class TalkPersonAction(Action):
         state.get_person_pool().remove(self.person)
 
     def generate_text(self, agent):
-        return "%s talked to %s" % (agent.get_name(), self.person.get_name())
+        return "%s talked to %s." % (agent.get_name(), self.person.get_name())
 
     def gen_quest_text(self):
         return "You see %s. You remember talking to him yesterday in the same place." % self.person.get_name()
@@ -71,7 +71,7 @@ class GetDrunkAction(Action):
         agent.get_state().inc_moves()
 
     def generate_text(self, agent):
-        return "%s got drunk and lost his memory" % agent.get_name()
+        return "%s got drunk and lost his memory." % agent.get_name()
 
     def gen_quest_text(self):
         return "You wake up with a hungover. It looks like you partied too hard and now can't remember what happened last night."
@@ -85,7 +85,7 @@ class HitWallAction(Action):
         agent.get_state().inc_moves()
 
     def generate_text(self, agent):
-        return "%s walked into a wall and lost his memory" % agent.get_name()
+        return "%s walked into a wall and lost his memory." % agent.get_name()
 
     def gen_quest_text(self):
         return "You wake up and notice that you have a headache. Looks like you hit something pretty hard and now can't remember what happened."
@@ -99,7 +99,7 @@ class LoseItemAction(Action):
         agent.get_state().inc_moves()
 
     def generate_text(self, agent):
-        return "%s lost his %s" % (agent.get_name(), self.item.get_name())
+        return "%s lost his %s." % (agent.get_name(), self.item.get_name())
 
     def gen_quest_text(self):
         return "While examining your current location, you have found your %s! You're lucky it is still here." % self.item.get_name()
@@ -115,7 +115,7 @@ class ExamineLocationAction(Action):
         agent.get_state().inc_moves()
     
     def generate_text(self, agent):
-        return "%s looked around %s" % (agent.get_name(), agent.get_state().get_current_location().get_name())
+        return "%s looked around %s." % (agent.get_name(), agent.get_state().get_current_location().get_name())
     
 class ExamineItemAction(Action):
     def __init__(self, item):
@@ -126,4 +126,4 @@ class ExamineItemAction(Action):
         agent.get_state().inc_moves()
         
     def generate_text(self, agent):
-        return "%s examined %s" % (agent.get_name(), self.item.get_name())
+        return "%s examined %s." % (agent.get_name(), self.item.get_name())

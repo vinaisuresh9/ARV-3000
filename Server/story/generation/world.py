@@ -17,6 +17,7 @@ class World:
         self.history = []
         self.qid = 0
         self.tmp = []
+        self.story = ""
 
     def set_agent(self, agent):
         self.agent = agent
@@ -114,6 +115,14 @@ class World:
             quests.append(Quest(1000, "It looks like you completely recovered your memory. What a weird day!", last_quest_id, "QTYPE_OTHER", None, None, None))
         return quests
 
+    def form_story(self):
+        self.story = ""
+        for action in self.history:
+            self.story = self.story + " " + action[1].generate_text(self.agent)
+
+    def get_story(self):
+        return self.story
+
 def generate_story():
     location_pool = story.generation.entity.location.get_location_pool()
     person_pool = story.generation.entity.person.get_people_pool()
@@ -124,7 +133,9 @@ def generate_story():
 
     while not world.get_agent().get_state().is_lost_memory():
         world.progress_turn()
+    world.form_story()
     return world
 
 if __name__ == "__main__":
     world = generate_story()
+    print(world.get_story())

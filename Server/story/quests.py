@@ -45,3 +45,9 @@ def get_quests(story_id, last_quest_id):
     if story_id in stories:
         quests = stories[story_id].generate_quests(last_quest_id)
     return quests
+
+def get_story(story_id):
+    if story_id in stories:
+        return stories[story_id].get_story()
+    else:
+        return ""
