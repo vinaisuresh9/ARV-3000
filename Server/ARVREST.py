@@ -41,6 +41,11 @@ def getAvailableQuests(story_id,quest_id):
     quests = get_quests(story_id,quest_id)
     return jsonify(quests=quests)
 
+@app.route('/api/get_story/<int:story_id>', methods=['GET'])
+def getSTory(story_id):
+    story = get_story(story_id)
+    return jsonify(story=story)
+
 
 @app.errorhandler(404)
 def not_found(error):
