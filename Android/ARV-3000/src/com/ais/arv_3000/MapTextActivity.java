@@ -113,9 +113,9 @@ public class MapTextActivity extends Activity {
 					String locName="ERROR";
 					double lat=0, lon=0;
 					try {
-						lat = obj.getDouble("lat");
-						lon = obj.getDouble("lon");
-						locName = obj.getString("desc");
+						lat = obj.getJSONObject("location").getDouble("lat");
+						lon = obj.getJSONObject("location").getDouble("lon");
+						locName = obj.getJSONObject("location").getString("name");
 					} catch (JSONException e) {
 						e.printStackTrace();
 					}
@@ -126,6 +126,12 @@ public class MapTextActivity extends Activity {
 				request = new RequestTask().execute(MainActivity.hostApi+"get_available_quests/"+storyId+"/"+questId);
 				questJson = new JSONObject(request.get().toString());
 				arr = questJson.getJSONArray("quests");
+				if(arr.length() == 0) {
+					Intent end = new Intent(MapTextActivity.this, EndActivity.class);
+					end.putExtra("storyId", storyId);
+					startActivity(end);
+					finish();
+				}
 				questArrIndex = 0;
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -136,11 +142,12 @@ public class MapTextActivity extends Activity {
 			}
         } else {
         	try {
-        		request = new RequestTask().execute(MainActivity.hostApi+"get_available_quests/0/"+storyId);
+        		request = new RequestTask().execute(MainActivity.hostApi+"get_available_quests/"+storyId+"/0");
     			questJson = new JSONObject(request.get().toString());
     			arr = questJson.getJSONArray("quests");
     			if(arr.length() == 0) {
 					Intent end = new Intent(MapTextActivity.this, EndActivity.class);
+					end.putExtra("storyId", storyId);
 					startActivity(end);
 					finish();
 				}
@@ -177,7 +184,6 @@ public class MapTextActivity extends Activity {
 						quest = true;
 					}
 				} catch (JSONException e1) {
-					e1.printStackTrace();
 				}
 				Log.d("quest?", ""+quest);
 				Log.d("demo?",""+demo);
@@ -205,7 +211,8 @@ public class MapTextActivity extends Activity {
 							try {
 								if(!arr.getJSONObject(questArrIndex).getString("result").equals("null")) {
 									Log.d("loc:",arr.getJSONObject(questArrIndex).getJSONObject("location").toString());
-									locs.add(arr.getJSONObject(questArrIndex).getJSONObject("location"));
+									//locs.add(arr.getJSONObject(questArrIndex).getJSONObject("location"));
+									locs.add(arr.getJSONObject(questArrIndex));
 									questArrIndex++;
 								}
 							} catch (JSONException e) {
@@ -221,9 +228,9 @@ public class MapTextActivity extends Activity {
 							String locName="ERROR";
 							double lat = 0, lon = 0;
 							try {
-								lat = locs.get(i).getDouble("lat");
-								lon = locs.get(i).getDouble("lon");
-								locName = locs.get(i).getString("desc");
+								lat = locs.get(i).getJSONObject("location").getDouble("lat");
+								lon = locs.get(i).getJSONObject("location").getDouble("lon");
+								locName = locs.get(i).getJSONObject("location").getString("name");
 							} catch (JSONException e) {
 								e.printStackTrace();
 								done = true;
@@ -233,13 +240,13 @@ public class MapTextActivity extends Activity {
 					        .position(point)
 					        .title(locName));
 						}
-						storyline.setText("Choose a location and head over, when you get within 30"
+						storyline.setText("Choose a location and head over, when you get within 30 "
 								+ "feet of the location hit next.");
 					} else {
 						for(int i=0; i<locs.size(); i++) {
 							try {
-								saveCoordinatesInPreferences((float)locs.get(i).getDouble("lat"),(float)locs.get(i).getDouble("lon"));
-								done = checkDistance(locs.get(i).getString("name"),locs.get(i).getDouble("lat"),locs.get(i).getDouble("lon"));
+								saveCoordinatesInPreferences((float)locs.get(i).getJSONObject("location").getDouble("lat"),(float)locs.get(i).getJSONObject("location").getDouble("lon"));
+								done = checkDistance(locs.get(i).getJSONObject("location").getString("name"),locs.get(i).getJSONObject("location").getDouble("lat"),locs.get(i).getJSONObject("location").getDouble("lon"));
 							} catch (JSONException e) {
 								e.printStackTrace();
 							}
@@ -260,10 +267,15 @@ public class MapTextActivity extends Activity {
 						obj = arr.getJSONObject(questArrIndex);
 						questArrIndex++;
 						s = obj.getString("desc");
+						storyline.setText(s);
 					} catch (JSONException e) {
 						e.printStackTrace();
 					}
-					storyline.setText(s);
+					if(obj == null) {
+						Intent end = new Intent(MapTextActivity.this, EndActivity.class);
+						startActivity(end);
+						finish();
+					}
 				}
 			}
 		});
@@ -316,7 +328,7 @@ public class MapTextActivity extends Activity {
 		dest.setLatitude(lat);
 		dest.setLongitude(lon);
 		double dist = currentLoc.distanceTo(dest);
-		if(dist <= 30) {
+		if(dist <= 85) {
 			return true;
 		}
 		return false;
